@@ -1,11 +1,11 @@
-import React from 'react';
-import { Responsive, WidthProvider } from 'react-grid-layout';
+import React, { useEffect } from 'react';
+import { Layout, Responsive, WidthProvider } from 'react-grid-layout';
 import { Group } from '@/components/widgets/WidgetGroup';
 import { Widget, WidgetProps } from '@/components/widgets/Widget';
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
 import { DashboardControls } from '@/components/widgets/DashboardControls';
-import { useDashboard } from '@/hooks/use-dashboard';
+import { useDashboardStore } from '@/store/widget-store';
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
@@ -18,26 +18,35 @@ const initialAvailableWidgets: WidgetProps[] = [
 
 export const Home: React.FC = () => {
   const {
-    addGroupToDashboard,
-    addWidgetToDashboard,
-    onLayoutChange,
-    removeWidgetFromDashboard,
-    removeGroup,
-    updateGroupWidgets,
-    widgets,
     groups,
+    widgets,
     layout,
-    initialAvailableWidgets: availableWidgets,
+    availableWidgets,
+    addGroup,
+    addWidget,
+    removeGroup,
+    removeWidget,
     addWidgetToGroup,
     removeWidgetFromGroup,
-  } = useDashboard(initialAvailableWidgets);
+    updateGroupWidgets,
+    updateLayout,
+    setAvailableWidgets,
+  } = useDashboardStore();
+
+  const onLayoutChange = (newLayout: Layout[]) => {
+    updateLayout(newLayout);
+  };
+
+  useEffect(() => {
+    setAvailableWidgets(initialAvailableWidgets);
+  }, [setAvailableWidgets]);
 
   return (
     <div className="p-4">
       <h1 className="text-3xl font-semibold mb-6">Dashboard</h1>
       <DashboardControls
-        onAddGroup={addGroupToDashboard}
-        onAddWidget={addWidgetToDashboard}
+        onAddGroup={addGroup}
+        onAddWidget={addWidget}
         availableWidgets={availableWidgets}
       />
 
@@ -57,7 +66,7 @@ export const Home: React.FC = () => {
           <div key={widget.id}>
             <Widget
               {...widget}
-              onRemove={() => removeWidgetFromDashboard(widget.id)}
+              onRemove={() => removeWidget(widget.id)}
               isDashboardWidget
             />
           </div>
